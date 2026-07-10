@@ -1,0 +1,12 @@
+# Instalaciones Electricas Ruiz
+
+This is the official website for Instalaciones Electricas Ruiz.
+
+Current status: the production website is being prepared. The live page is a temporary coming soon notice while the full site is developed.
+
+Canonical URL: https://instalacioneselectricasruiz.com/
+
+Important files:
+- https://instalacioneselectricasruiz.com/
+- https://instalacioneselectricasruiz.com/robots.txt
+- https://instalacioneselectricasruiz.com/sitemap.xml
