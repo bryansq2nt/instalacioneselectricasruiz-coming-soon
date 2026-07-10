@@ -1,0 +1,64 @@
+name: Deploy coming soon site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  audit:
+    name: SEO/GEO audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit static output
+        uses: bryansq2nt/ftp-release-deploy/.github/actions/static-site-audit@main
+        with:
+          site-dir: public
+          base-url: https://instalacioneselectricasruiz.com
+          generate-sitemap: "true"
+          strict: "true"
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    if: github.event_name != 'pull_request'
+    needs: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate sitemap for deploy artifact
+        uses: bryansq2nt/ftp-release-deploy/.github/actions/static-site-audit@main
+        with:
+          site-dir: public
+          base-url: https://instalacioneselectricasruiz.com
+          generate-sitemap: "true"
+          strict: "true"
+      - name: Deploy public directory
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=instalacioneselectricasruiz-coming-soon --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  verify-production:
+    name: Verify production
+    if: github.event_name != 'pull_request'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify live site without IndexNow
+        uses: bryansq2nt/ftp-release-deploy/.github/actions/static-site-audit@main
+        with:
+          site-dir: public
+          base-url: https://instalacioneselectricasruiz.com
+          generate-sitemap: "true"
+          verify-public: "true"
+          verify-sitemap: "true"
+          submit-indexnow: "false"
